@@ -4,14 +4,15 @@ from enum import Enum
 class LineType(Enum):
 	UNKNOWN = 0
 	EXPENSE_NAME = 1
-	EXPENSE_STREET_CITY = 1
-	EXPENSE_STATE_ZIP = 1
-	EXPENSE_SECTION = 1
+	EXPENSE_ADDRESS1 = 2
+	EXPENSE_ADDRESS2 = 3
+	EXPENSE_SECTION = 4
 
 class Expense:
 	def __init__(self):
 		date = None
 		name = None
+		full_address = None
 		street = None
 		city = None
 		state = None
@@ -30,7 +31,8 @@ class Expense:
 		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nCity: {5}\nState: {6}\nZip: {7}".format(self.date,self.method,self.name,self.amount,self.street, self.city, self.state, self.zip_code))
 
 	def print_more3(self):
-		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nCity: {5}\nState: {6}\nZip: {7}\nPurpose: {8}".format(self.date,self.method,self.name,self.amount,self.street, self.city, self.state, self.zip_code, self.purpose))
+		#print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nCity: {5}\nState: {6}\nZip: {7}\nPurpose: {8}".format(self.date,self.method,self.name,self.amount,self.street, self.city, self.state, self.zip_code, self.purpose))
+		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nFull Address: {4}\nPurpose: {5}".format(self.date,self.method,self.name,self.amount,self.full_address, self.purpose))
 	def set_street_city(self,street_city):
 		[street,city] = street_city.split(", ")
 		self.street = street
@@ -50,15 +52,19 @@ expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (\w*)(.*)\$([\d.,]*)')
 expenditure_street_city = re.compile('^ {41}(.*),')
 expenditure_state_zip = re.compile('^ {41}([A-Za-z ]+)(\d+)')
 expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
+expenditure_full_address = re.compile('^ {41}(.*)')
 
 line_type = LineType.UNKNOWN
 
 expense = Expense()
 for line in Lines:
-	if line_type == LineType.UNKNOWN and expenditure_section.match(line):
+	#print(line)
+	#print("line_type: " + line_type.name)
+	if (line_type == LineType.UNKNOWN) and expenditure_section.match(line):
 		print("Matrch")
 		line_type = LineType.EXPENSE_SECTION
-	if line_type == LineType.EXPENSE_SECTION and expenditure_name.match(line):
+		continue
+	if (line_type == LineType.EXPENSE_SECTION) and expenditure_name.match(line):
 		m = expenditure_name.match(line)
 		line_type = LineType.EXPENSE_NAME
 		print("Entry")
@@ -72,24 +78,29 @@ for line in Lines:
 		expense.amount = m.group(4)
 		#expense.print_name()
 		#print(expense)
-	if line_type == LineType.EXPENSE_NAME and expenditure_street_city.match(line):
-		print("match_street_city")
-		m = expenditure_street_city.match(line)
-		line_type = LineType.EXPENSE_STREET_CITY
-		expense.set_street_city(m.group(1))
+		continue
+	if (line_type == LineType.EXPENSE_NAME) and expenditure_full_address.match(line):
+		print("address_line_1")
+		m = expenditure_full_address.match(line)
+		line_type = LineType.EXPENSE_ADDRESS1
+		expense.full_address = m.group(1)
 		#expense.print_more()
 		#print("address1")
 		#print(m.group(1))
-	if line_type == LineType.EXPENSE_STREET_CITY and expenditure_state_zip.match(line):
-		print("match_state_zip")
-		m = expenditure_state_zip.match(line)
-		line_type = LineType.EXPENSE_STATE_ZIP
-		expense.set_state_zip(m.group(1),m.group(2))
+		continue
+	if line_type == LineType.EXPENSE_ADDRESS1 and expenditure_full_address.match(line):
+		print("address_line_2")
+		m = expenditure_full_address.match(line)
+		line_type = LineType.EXPENSE_ADDRESS2
+		expense.full_address = expense.full_address + ' ' + m.group(1)
 		#expense.print_more2()
-	if line_type == LineType.EXPENSE_STATE_ZIP and expenditure_purpose.match(line):
+		continue
+	if line_type == LineType.EXPENSE_ADDRESS2 and expenditure_purpose.match(line):
+		print("purpose")
 		m = expenditure_purpose.match(line)
 		line_type = LineType.EXPENSE_SECTION
 		expense.purpose=m.group(1).strip()
 		expense.print_more3()
+		continue
 	
 
