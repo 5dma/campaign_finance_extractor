@@ -45,6 +45,7 @@ class Contribution(Transaction):
 		aggregate_to_date = None
 
 	def write_record(self):
+		print(self.full_address)
 		address_components = self.full_address.split(', ')
 		if (len(address_components) == 3):
 			self.address_line_1 = address_components[0]
@@ -133,8 +134,8 @@ expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
 expenditure_full_address = re.compile('^ {41}(.*)|^ {18}Card/Visa(.*)')
 
 contribution_section = re.compile('^ {49}Expenditures')
-contribution_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.*)\$([\d.,]+ ([\w ]+)\$)([\d.,]+)')
-contribution_full_address = re.compile('^ {18}(.*)')
+contribution_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.*)\$([\d.,]+) ([\w ]+)\$([\d.,]+)')
+contribution_full_address = re.compile('^ {18}([\S ]{,63})')
 contribution_end = re.compile('^$')
 
 line_type = LineType.UNKNOWN
@@ -194,6 +195,8 @@ for line in Lines:
 		m = contribution_full_address.match(line)
 		line_type = LineType.CONTRIBUTION_FULL_ADDRESS
 		contribution.full_address = m.group(1).strip()
+		print(contribution.name)
+		print(contribution.full_address)
 		continue
 	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_full_address.match(line):
 		print("FUll address")
