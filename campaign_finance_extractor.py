@@ -25,7 +25,6 @@ class Expense:
 		
 
 	def write_record(self):
-		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nFull Address: {4}\nPurpose: {5}".format(self.date,self.method,self.name,self.amount,self.full_address, self.purpose))
 		address_components = self.full_address.split(', ')
 		if (len(address_components) == 3):
 			self.address_line_1 = address_components[0]
