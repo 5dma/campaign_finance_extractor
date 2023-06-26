@@ -1,13 +1,14 @@
 import os
 import re
 from enum import Enum
+import csv
+import sys
+
 class LineType(Enum):
 	UNKNOWN = 0
 	EXPENSE_NAME = 1
 	EXPENSE_FULL_ADDRESS = 2
-	EXPENSE_ADDRESS1 = 3
-	EXPENSE_ADDRESS2 = 4
-	EXPENSE_SECTION = 5
+	EXPENSE_SECTION = 3
 
 class Expense:
 	def __init__(self):
@@ -41,8 +42,7 @@ class Expense:
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		huge_line = "\t".join([self.name,self.address_line_1,self.address_line_2,self.city,self.state,self.zip_code,self.method,self.amount,self.purpose])
-		print(huge_line,file=csv_file)
+		writer.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose})
 
 
 	def reset(self):
@@ -59,13 +59,24 @@ class Expense:
 		purpose = None
 
 
+if len(sys.argv) < 2:
+	print("\nUsage:\npython3 campaign_finance_extractor.py <path_to_pdf>\n")
+	sys.exit()
+
 TEXT_FILE = '/tmp/extracted_text.txt'
 CSV_FILE = '/tmp/campaign_finance.csv'
-os.system('pdftotext -nopgbrk -layout report_2022-11-16_to_2023-01-11.pdf ' + TEXT_FILE)
+PDF_FILE = sys.argv[1]
+pdftotext_command = 'pdftotext -nopgbrk -layout {0} {1} '.format(PDF_FILE, TEXT_FILE)
+os.system(pdftotext_command)
 file = open(TEXT_FILE, 'r')
 Lines = file.readlines()
 file.close()
+
 csv_file = open(CSV_FILE,'w')
+fieldnames = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose']
+writer = csv.DictWriter(csv_file, fieldnames=fieldnames,delimiter='\t')
+writer.writeheader()
+
 expenditure_section = re.compile('^ {71}Expenditures')
 expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (\w*)(.*)\$([\d.,]*)')
 expenditure_street_city = re.compile('^ {41}(.*),')
