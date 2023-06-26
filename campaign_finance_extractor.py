@@ -45,7 +45,6 @@ class Contribution(Transaction):
 		aggregate_to_date = None
 
 	def write_record(self):
-		print(self.full_address)
 		address_components = self.full_address.split(', ')
 		if (len(address_components) == 3):
 			self.address_line_1 = address_components[0]
@@ -71,14 +70,26 @@ class Expense(Transaction):
 
 	def write_record(self):
 		address_components = self.full_address.split(', ')
+		print(self.full_address)
+		if (len(address_components) == 1):
+			self.address_line_1 = address_components[0]
+			self.address_line_2 = ''
+			self.city = ''
+			self.state = ''
+			self.zip_code = ''
 		if (len(address_components) == 3):
 			self.address_line_1 = address_components[0]
 			self.address_line_2 = ''
 			self.city = address_components[1]
 			m = expenditure_state_zip.match(address_components[2])
-			self.state = m.group(1)
-			self.zip_code = m.group(2)
-		else:
+			try:
+				self.state = m.group(1)
+				self.zip_code = m.group(2)
+			except AttributeError:
+				self.state = ''
+				self.zip_code = ''
+
+		if (len(address_components) == 4):
 			self.address_line_1 = address_components[0]
 			self.address_line_2 = address_components[1]
 			self.city = address_components[2]
@@ -86,7 +97,7 @@ class Expense(Transaction):
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		writer.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure'})
+		writer_expense.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure'})
 
 
 	def reset(self):
@@ -127,7 +138,7 @@ fieldnames_contribution = ['Name','Address Line 1','Address Line 2','City','Stat
 writer_contribution = csv.DictWriter(csv_file_contribution, fieldnames=fieldnames_contribution,delimiter='\t')
 writer_contribution.writeheader()
 
-expenditure_section = re.compile('^ {71}Expenditures')
+expenditure_section = re.compile('^ {60,80}Expenditures')
 expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (\w*)(.*)\$([\d.,]*)')
 expenditure_state_zip = re.compile('^([A-Za-z ]+)(\d+)')
 expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
@@ -146,7 +157,7 @@ totals = {"Contributions": 0, "Expenses": 0}
 
 
 for line in Lines:
-	if (line_type == LineType.UNKNOWN) and expenditure_section.match(line):
+	if expenditure_section.match(line):
 		line_type = LineType.EXPENSE_SECTION
 		continue
 	if (line_type == LineType.EXPENSE_SECTION) and expenditure_name.match(line):
@@ -175,12 +186,10 @@ for line in Lines:
 		expense.write_record()
 		expense.reset()
 		continue
-	if (line_type == LineType.UNKNOWN) and contribution_section.match(line):
+	if contribution_section.match(line):
 		line_type = LineType.CONTRIBUTION_SECTION
-		print("Contibution")
 		continue
 	if (line_type == LineType.CONTRIBUTION_SECTION) and contribution_name.match(line):
-		print("Name")
 		m = contribution_name.match(line)
 		line_type = LineType.CONTRIBUTION_NAME
 		contribution.date = m.group(1)
@@ -191,21 +200,16 @@ for line in Lines:
 		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		continue
 	if (line_type == LineType.CONTRIBUTION_NAME) and contribution_full_address.match(line):
-		print("FUll address")
 		m = contribution_full_address.match(line)
 		line_type = LineType.CONTRIBUTION_FULL_ADDRESS
 		contribution.full_address = m.group(1).strip()
-		print(contribution.name)
-		print(contribution.full_address)
 		continue
 	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_full_address.match(line):
-		print("FUll address")
 		m = contribution_full_address.match(line)
 		line_type = LineType.CONTRIBUTION_FULL_ADDRESS
 		contribution.full_address += ' ' + m.group(1).strip()
 		continue
 	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_end.match(line):
-		print("END")
 		m = expenditure_purpose.match(line)
 		line_type = LineType.CONTRIBUTION_SECTION
 		contribution.write_record()
