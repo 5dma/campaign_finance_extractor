@@ -23,16 +23,8 @@ class Expense:
 		amount = None
 		purpose = None
 		
-	def print_name(self):
-		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}".format(self.date,self.method,self.name,self.amount))
 
-	def print_more(self):
-		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nCity: {5}".format(self.date,self.method,self.name,self.amount,self.address_line_1, self.city))
-
-	def print_more2(self):
-		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nCity: {5}\nState: {6}\nZip: {7}".format(self.date,self.method,self.name,self.amount,self.address_line_1, self.city, self.state, self.zip_code))
-
-	def print_more3(self):
+	def write_record(self):
 		print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nFull Address: {4}\nPurpose: {5}".format(self.date,self.method,self.name,self.amount,self.full_address, self.purpose))
 		address_components = self.full_address.split(', ')
 		if (len(address_components) == 3):
@@ -53,13 +45,6 @@ class Expense:
 		huge_line = "\t".join([self.name,self.address_line_1,self.address_line_2,self.city,self.state,self.zip_code,self.method,self.amount,self.purpose])
 		print(huge_line,file=csv_file)
 
-	def set_street_city(self,street_city):
-		[street,city] = street_city.split(", ")
-		self.street = street
-		self.city = city
-	def set_state_zip(self,state,zip_code):
-		self.state = state.strip()
-		self.zip_code= zip_code
 
 	def reset(self):
 		date = None
@@ -119,7 +104,7 @@ for line in Lines:
 		m = expenditure_purpose.match(line)
 		line_type = LineType.EXPENSE_SECTION
 		expense.purpose=m.group(1).strip()
-		expense.print_more3()
+		expense.write_record()
 		expense.reset()
 		continue
 	
