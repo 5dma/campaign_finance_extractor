@@ -50,7 +50,6 @@ class Expense:
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		#print("Date: {0}\nMethod: {1}\nName: {2}\nAmount: {3}\nAddress 1: {4}\nAddress 2: {5}\nCity: {6}\nState: {7}\nZip: {8}\nPurpose: {9}".format(self.date,self.method,self.name,self.amount,self.address_line_1,self.address_line_2, self.city, self.state, self.zip_code, self.purpose))
 		huge_line = "\t".join([self.name,self.address_line_1,self.address_line_2,self.city,self.state,self.zip_code,self.method,self.amount,self.purpose])
 		print(huge_line,file=csv_file)
 
@@ -95,10 +94,7 @@ line_type = LineType.UNKNOWN
 
 expense = Expense()
 for line in Lines:
-	#print(line)
-	#print("line_type: " + line_type.name)
 	if (line_type == LineType.UNKNOWN) and expenditure_section.match(line):
-		#print("Matrch")
 		line_type = LineType.EXPENSE_SECTION
 		continue
 	if (line_type == LineType.EXPENSE_SECTION) and expenditure_name.match(line):
@@ -110,26 +106,16 @@ for line in Lines:
 		expense.amount = m.group(4)
 		continue
 	if (line_type == LineType.EXPENSE_NAME) and expenditure_full_address.match(line):
-		print("address_line_1")
 		m = expenditure_full_address.match(line)
 		line_type = LineType.EXPENSE_FULL_ADDRESS
-		#print(m.group(0))
-		#print(m.group(1))
-		#print(m.group(2))
 		expense.full_address = m.group(1).strip() if m.group(1) != None else m.group(2).strip()
-		print(expense.full_address)
-		#expense.print_more()
 		continue
 	if line_type == LineType.EXPENSE_FULL_ADDRESS and expenditure_full_address.match(line):
-		print("more_address")
 		m = expenditure_full_address.match(line)
 		line_type = LineType.EXPENSE_FULL_ADDRESS
 		expense.full_address = expense.full_address + ' ' + m.group(1).strip()
-		print(expense.full_address)
-		#expense.print_more2()
 		continue
 	if line_type == LineType.EXPENSE_FULL_ADDRESS and expenditure_purpose.match(line):
-		#print("purpose")
 		m = expenditure_purpose.match(line)
 		line_type = LineType.EXPENSE_SECTION
 		expense.purpose=m.group(1).strip()
