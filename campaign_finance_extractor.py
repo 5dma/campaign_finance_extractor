@@ -79,15 +79,16 @@ writer.writeheader()
 
 expenditure_section = re.compile('^ {71}Expenditures')
 expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (\w*)(.*)\$([\d.,]*)')
-expenditure_street_city = re.compile('^ {41}(.*),')
 expenditure_state_zip = re.compile('^([A-Za-z ]+)(\d+)')
-#expenditure_state_zip = re.compile('^ {41}([A-Za-z ]+)(\d+)')
 expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
 expenditure_full_address = re.compile('^ {41}(.*)|^ {18}Card/Visa(.*)')
 
 line_type = LineType.UNKNOWN
 
 expense = Expense()
+totals = {"Contributions": 0, "Expenses": 0}
+
+
 for line in Lines:
 	if (line_type == LineType.UNKNOWN) and expenditure_section.match(line):
 		line_type = LineType.EXPENSE_SECTION
@@ -99,6 +100,7 @@ for line in Lines:
 		expense.method = m.group(2)
 		expense.name = m.group(3).strip()
 		expense.amount = m.group(4)
+		totals['Expenses'] += float(expense.amount.replace(',',''))
 		continue
 	if (line_type == LineType.EXPENSE_NAME) and expenditure_full_address.match(line):
 		m = expenditure_full_address.match(line)
@@ -120,3 +122,5 @@ for line in Lines:
 	
 
 csv_file.close()
+print("Totals:\nContributions: {0:10,.2f}\nExpenditures: {1:11,.2f}".format(totals['Contributions'],totals['Expenses']))
+print("\nResults in {0}\n".format(CSV_FILE))
