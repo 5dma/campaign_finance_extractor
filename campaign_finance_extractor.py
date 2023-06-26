@@ -42,7 +42,7 @@ class Expense:
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		writer.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose})
+		writer.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure'})
 
 
 	def reset(self):
@@ -73,7 +73,7 @@ Lines = file.readlines()
 file.close()
 
 csv_file = open(CSV_FILE,'w')
-fieldnames = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose']
+fieldnames = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose','Category']
 writer = csv.DictWriter(csv_file, fieldnames=fieldnames,delimiter='\t')
 writer.writeheader()
 
