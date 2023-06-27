@@ -61,7 +61,7 @@ class Contribution(Transaction):
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		writer_contribution.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Aggregate to Date':self.aggregate_to_date,'Category':'Contribution'})
+		writer_contribution.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Aggregate to Date':self.aggregate_to_date,'Category':'Contribution','Report':PDF_FILE})
 
 class Expense(Transaction):
 	def __init__(self):
@@ -97,7 +97,7 @@ class Expense(Transaction):
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		writer_expense.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure'})
+		writer_expense.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure','Report':PDF_FILE})
 
 
 	def reset(self):
@@ -129,12 +129,12 @@ Lines = file.readlines()
 file.close()
 
 csv_file_expense = open(CSV_FILE_EXPENSE,'w')
-fieldnames_expense = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose','Category']
+fieldnames_expense = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose','Category','Report']
 writer_expense = csv.DictWriter(csv_file_expense, fieldnames=fieldnames_expense,delimiter='\t')
 writer_expense.writeheader()
 
 csv_file_contribution = open(CSV_FILE_CONTRIBUTE,'w')
-fieldnames_contribution = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Aggregate to Date','Category']
+fieldnames_contribution = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Aggregate to Date','Category','Report']
 writer_contribution = csv.DictWriter(csv_file_contribution, fieldnames=fieldnames_contribution,delimiter='\t')
 writer_contribution.writeheader()
 
