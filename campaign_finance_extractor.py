@@ -199,6 +199,18 @@ for line in Lines:
 		contribution.amount = m.group(5)
 		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		continue
+	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_name.match(line):
+		contribution.write_record()
+		m = contribution_name.match(line)
+		line_type = LineType.CONTRIBUTION_NAME
+		contribution.date = m.group(1)
+		contribution.name = m.group(2).strip()
+		contribution.aggregate_to_date= m.group(3).strip()
+		contribution.method = m.group(4).strip()
+		contribution.amount = m.group(5)
+		totals['Contributions'] += float(contribution.amount.replace(',',''))
+		contribution.reset()
+		continue
 	if (line_type == LineType.CONTRIBUTION_NAME) and contribution_full_address.match(line):
 		m = contribution_full_address.match(line)
 		line_type = LineType.CONTRIBUTION_FULL_ADDRESS
