@@ -1,3 +1,4 @@
+#!/bin/python3
 import os
 import re
 from enum import Enum
@@ -167,7 +168,6 @@ for line in Lines:
 		expense.method = m.group(2)
 		expense.name = m.group(3).strip()
 		expense.amount = m.group(4)
-		totals['Expenses'] += float(expense.amount.replace(',',''))
 		continue
 	if (line_type == LineType.EXPENSE_NAME) and expenditure_full_address.match(line):
 		m = expenditure_full_address.match(line)
@@ -183,6 +183,7 @@ for line in Lines:
 		m = expenditure_purpose.match(line)
 		line_type = LineType.EXPENSE_SECTION
 		expense.purpose=m.group(1).strip()
+		totals['Expenses'] += float(expense.amount.replace(',',''))
 		expense.write_record()
 		expense.reset()
 		continue
@@ -197,9 +198,9 @@ for line in Lines:
 		contribution.aggregate_to_date= m.group(3).strip()
 		contribution.method = m.group(4).strip()
 		contribution.amount = m.group(5)
-		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		continue
 	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_name.match(line):
+		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		contribution.write_record()
 		m = contribution_name.match(line)
 		line_type = LineType.CONTRIBUTION_NAME
@@ -208,7 +209,6 @@ for line in Lines:
 		contribution.aggregate_to_date= m.group(3).strip()
 		contribution.method = m.group(4).strip()
 		contribution.amount = m.group(5)
-		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		contribution.reset()
 		continue
 	if (line_type == LineType.CONTRIBUTION_NAME) and contribution_full_address.match(line):
@@ -224,6 +224,7 @@ for line in Lines:
 	if line_type == LineType.CONTRIBUTION_FULL_ADDRESS and contribution_end.match(line):
 		m = expenditure_purpose.match(line)
 		line_type = LineType.CONTRIBUTION_SECTION
+		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		contribution.write_record()
 		contribution.reset()
 		continue
