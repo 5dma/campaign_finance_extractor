@@ -140,7 +140,7 @@ writer_contribution = csv.DictWriter(csv_file_contribution, fieldnames=fieldname
 writer_contribution.writeheader()
 
 expenditure_section = re.compile('^ {60,80}Expenditures')
-expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (\w*)(.*)\$([\d.,]*)')
+expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.{,15}) (.*)\$([\d.,]*)')
 expenditure_state_zip = re.compile('^([A-Za-z ]+)(\d+)')
 expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
 expenditure_full_address = re.compile('^ {41}(.*)|^ {18}Card/Visa(.*)')
@@ -166,7 +166,7 @@ for line in Lines:
 		m = expenditure_name.match(line)
 		line_type = LineType.EXPENSE_NAME
 		expense.date = m.group(1)
-		expense.method = m.group(2)
+		expense.method = m.group(2).strip()
 		expense.name = m.group(3).strip()
 		expense.amount = m.group(4)
 		continue
