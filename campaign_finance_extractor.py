@@ -67,6 +67,7 @@ class Contribution(Transaction):
 class Expense(Transaction):
 	def __init__(self):
 		purpose = None
+		reimbursement_recipient = None
 		
 
 	def write_record(self):
@@ -98,7 +99,7 @@ class Expense(Transaction):
 			self.state = m.group(1)
 			self.zip_code = m.group(2)
 
-		writer_expense.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Category':'Expenditure','Report':PDF_FILE})
+		writer_expense.writerow({'Name':self.name,'Address Line 1':self.address_line_1,'Address Line 2':self.address_line_2,'City':self.city,'State':self.state,'Zip':self.zip_code,'Method':self.method,'Amount':self.amount,'Purpose':self.purpose,'Recipient':self.reimbursement_recipient,'Category':'Expenditure','Report':PDF_FILE})
 
 
 	def reset(self):
@@ -113,6 +114,7 @@ class Expense(Transaction):
 		method = None
 		amount = None
 		purpose = None
+		reimbursement_recipient = None
 
 
 if len(sys.argv) < 2:
@@ -130,7 +132,7 @@ Lines = file.readlines()
 file.close()
 
 csv_file_expense = open(CSV_FILE_EXPENSE,'w')
-fieldnames_expense = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose','Category','Report']
+fieldnames_expense = ['Name','Address Line 1','Address Line 2','City','State','Zip','Method','Amount','Purpose','Recipient','Category','Report']
 writer_expense = csv.DictWriter(csv_file_expense, fieldnames=fieldnames_expense,delimiter='\t')
 writer_expense.writeheader()
 
@@ -140,7 +142,7 @@ writer_contribution = csv.DictWriter(csv_file_contribution, fieldnames=fieldname
 writer_contribution.writeheader()
 
 expenditure_section = re.compile('^ {60,80}Expenditures')
-expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.{,15}) (.*)\$([\d.,]*)')
+expenditure_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.{24})(.{38})(.*)\$([\d.,]*)')
 expenditure_state_zip = re.compile('^([A-Za-z ]+)(\d+)')
 expenditure_purpose = re.compile('^Expenditure Purpose:(.*)')
 expenditure_full_address = re.compile('^ {41}(.*)|^ {18}Card/Visa(.*)')
@@ -168,7 +170,8 @@ for line in Lines:
 		expense.date = m.group(1)
 		expense.method = m.group(2).strip()
 		expense.name = m.group(3).strip()
-		expense.amount = m.group(4)
+		expense.reimbursement_recipient = '' if m.group(4).isspace() else m.group(4).strip()
+		expense.amount = m.group(5)
 		continue
 	if (line_type == LineType.EXPENSE_NAME) and expenditure_full_address.match(line):
 		m = expenditure_full_address.match(line)
