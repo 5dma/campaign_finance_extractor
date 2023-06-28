@@ -71,7 +71,7 @@ class Expense(Transaction):
 
 	def write_record(self):
 		address_components = self.full_address.split(', ')
-		print(self.full_address)
+		#print(self.full_address)
 		if (len(address_components) == 1):
 			self.address_line_1 = address_components[0]
 			self.address_line_2 = ''
@@ -149,6 +149,7 @@ contribution_section = re.compile('^ {49}Expenditures')
 contribution_name = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.*)\$([\d.,]+) ([\w ]+)\$([\d.,]+)')
 contribution_full_address = re.compile('^ {18}([\S ]{,63})')
 contribution_end = re.compile('^$')
+contribution_in_kind = re.compile('^ {7}(\d{2}/\d{2}/\d{4}) (.{30})\s*\$([\d.,]+)\s+\$([\d.,]+).*')
 
 line_type = LineType.UNKNOWN
 
@@ -227,6 +228,14 @@ for line in Lines:
 		totals['Contributions'] += float(contribution.amount.replace(',',''))
 		contribution.write_record()
 		contribution.reset()
+		continue
+	if (line_type == LineType.CONTRIBUTION_SECTION) and contribution_in_kind.match(line):
+		m = contribution_in_kind.match(line)
+		line_type = LineType.CONTRIBUTION_NAME
+		contribution.date = m.group(1)
+		contribution.method = m.group(2)
+		contribution.name = m.group(3).strip()
+		contribution.amount = m.group(4)
 		continue
 	
 
